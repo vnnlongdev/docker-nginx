@@ -1,0 +1,56 @@
+version: '2'
+services:
+  data:
+   image: busybox:latest
+   entrypoint: tail -f /dev/null
+  nginx:
+    image: evild/alpine-nginx:1.9.15-openssl
+    container_name: lemp_nginx
+    restart: always
+    links:
+      - php
+    volumes:
+      - .:/var/www/html/:ro
+      - ./nginx/conf/nginx.conf:/etc/nginx/conf/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./logs/nginx:/var/log/nginx
+    volumes_from:
+    - php
+    ports:
+      - 80:80
+      - 443:443
+  php:
+    build: docker/php
+    container_name: lemp_php
+    restart: always
+    working_dir: /app
+    volumes_from:
+    - data
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - mysql
+    links:
+      - mysql
+    ports:
+      - 9000:9000
+  mysql:
+    image: mysql:latest
+    container_name: lemp_mariadb
+    restart: always
+    command: mysqld --max_allowed_packet=1024M
+    environment:
+        MYSQL_ROOT_PASSWORD: root@123
+        MYSQL_USER: root
+        MYSQL_PASSWORD: root@123
+    volumes:
+        - './.data/mysql:/var/lib/mysql'
+    ports:
+      - 3306:3306
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    links:
+      - mysql:db
