@@ -1,7 +1,10 @@
 # Docker Containers
 PHP-FPM 7.2
+
 MySQL 5.7
+
 Nginx 1.17 Alpine
+
 Adminer
 
 # How to setup
